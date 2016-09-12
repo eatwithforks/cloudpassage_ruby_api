@@ -1,10 +1,10 @@
 # encoding: utf-8
-require 'rest_client'
+require 'rest-client'
 require_relative 'oauth'
 
 class Api
-  def initialize(key_id, secret_key)
-    token = ApiToken.token(key_id, secret_key)['access_token']
+  def initialize(key_id, secret_key, hostname)
+    token = ApiToken.token(key_id, secret_key, hostname)['access_token']
 
     @header = {
       'Authorization': "Bearer #{token}",
@@ -12,7 +12,7 @@ class Api
       'Cache-Control': 'no-store',
       'Pragma': 'no-cache'
     }
-    @hostname = ENV['api_hostname']
+    @hostname = hostname
   end
 
   def get(url)
