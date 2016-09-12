@@ -22,7 +22,8 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+api = Api.new(key_id, secret_key, api_hostname)
+response, data = api.get('v1/servers')
 
 ## Development
 
@@ -33,4 +34,3 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/cloudpassage.
-
