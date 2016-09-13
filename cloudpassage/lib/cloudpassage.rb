@@ -5,29 +5,53 @@ require_relative 'oauth'
 class Api
   def initialize(key_id, secret_key, hostname)
     token = ApiToken.token(key_id, secret_key, hostname)['access_token']
-
+    @key_id, @secret_key, @hostname = key_id, secret_key, hostname
     @header = {
       'Authorization': "Bearer #{token}",
       'Content-type': 'application/json;charset=UTF=8',
       'Cache-Control': 'no-store',
       'Pragma': 'no-cache'
     }
-    @hostname = hostname
   end
 
   def get(url)
-    RestClient.get("#{@hostname}/#{url}", @header) { |response| [response, JSON.parse(response)] }
+    do_analyze({ method: :get, url: "#{@hostname}/#{url}", headers: @header })
   end
 
   def post(url, body)
-    RestClient.post("#{@hostname}/#{url}", body, @header) { |response| [response, JSON.parse(response)] }
+    do_analyze({ method: :post, url: "#{@hostname}/#{url}", payload: body, headers: @header })
   end
 
   def put(url, body)
-    RestClient.put("#{@hostname}/#{url}", body, @header) { |response| response }
+    do_analyze({ method: :put, url: "#{@hostname}/#{url}", payload: body, headers: @header })
   end
 
   def delete(url)
-    RestClient.delete("#{@hostname}/#{url}", @header) { |response| response }
+    do_analyze({ method: :delete, url: "#{@hostname}/#{url}", headers: @header })
+  end
+
+  protected
+
+  def do_analyze(body)
+    begin
+      retries ||= 0
+      body[:headers] = @header
+      resp = RestClient::Request.execute(body) { |response| response }
+      raise if resp.code == 401
+      return resp
+    rescue
+      @header = renew_session
+      retry if (retries += 1) < 3
+    end
+  end
+
+  def renew_session
+    token = ApiToken.token(@key_id, @secret_key, @hostname)['access_token']
+    {
+      'Authorization': "Bearer #{token}",
+      'Content-type': 'application/json;charset=UTF=8',
+      'Cache-Control': 'no-store',
+      'Pragma': 'no-cache'
+    }
   end
 end
