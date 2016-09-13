@@ -15,19 +15,19 @@ class Api
   end
 
   def get(url)
-    do_analyze({ method: :get, url: "#{@hostname}/#{url}", headers: @header })
+    do_analyze({ method: :get, url: "#{@hostname}/#{url}" })
   end
 
   def post(url, body)
-    do_analyze({ method: :post, url: "#{@hostname}/#{url}", payload: body, headers: @header })
+    do_analyze({ method: :post, url: "#{@hostname}/#{url}", payload: body })
   end
 
   def put(url, body)
-    do_analyze({ method: :put, url: "#{@hostname}/#{url}", payload: body, headers: @header })
+    do_analyze({ method: :put, url: "#{@hostname}/#{url}", payload: body })
   end
 
   def delete(url)
-    do_analyze({ method: :delete, url: "#{@hostname}/#{url}", headers: @header })
+    do_analyze({ method: :delete, url: "#{@hostname}/#{url}" })
   end
 
   protected
