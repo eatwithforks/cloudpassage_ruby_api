@@ -3,7 +3,8 @@ require 'rest-client'
 require_relative 'oauth'
 
 class Api
-  def initialize(key_id, secret_key, hostname)
+  def initialize(key_id, secret_key, hostname = nil)
+    hostname ||= ENV['api_hostname']
     token = ApiToken.token(key_id, secret_key, hostname)['access_token']
     @key_id, @secret_key, @hostname = key_id, secret_key, hostname
     @header = {

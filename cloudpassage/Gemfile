@@ -2,5 +2,5 @@ source 'https://rubygems.org'
 
 # Specify your gem's dependencies in cloudpassage.gemspec
 gemspec
-gem 'rest-client'
-gem 'oauth'
+gem 'rest-client', '~> 1.6', '>= 1.6.7'
+gem 'oauth', '~> 0.5', '>=0.5.1'

@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["jlee@cloudpassage.com"]
 
   spec.summary       = %q{Ruby Cloudpassage API}
-  spec.description   = %q{Ruby Cloudpassage API}
+  spec.description   = %q{Ruby Cloudpassage API with GET POST PUT DELETE}
   spec.homepage      = "https://devgit.cloudpassage.com/jlee/ruby_api"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -21,8 +21,9 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency('rest-client', '>= 1.6.9')
-  spec.add_runtime_dependency('oauth', '>= 0.5.1')
+  spec.add_runtime_dependency('rest-client', '>= 1.6.7')
+  spec.add_runtime_dependency('oauth', '>=0.5.1')
+
   spec.add_development_dependency "bundler", "~> 1.12"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "minitest", "~> 5.0"
