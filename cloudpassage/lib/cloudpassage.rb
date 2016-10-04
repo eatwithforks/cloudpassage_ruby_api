@@ -1,7 +1,11 @@
 # encoding: utf-8
 require 'rest-client'
+require 'parallel'
 require_relative 'oauth'
+require_relative 'validator'
+require_relative 'query_controller'
 
+# Returns CloudPassage API HTTP requests
 class Api
   def initialize(key_id, secret_key, hostname = nil)
     hostname ||= ENV['api_hostname']
@@ -31,6 +35,11 @@ class Api
     do_analyze({ method: :delete, url: "#{@hostname}/#{url}" })
   end
 
+  def get_paginated(url)
+    data = Query.new(get(url)).fetch_params(@hostname)
+    fetch_entire_data(url, data)
+  end
+
   protected
 
   def do_analyze(body)
@@ -54,5 +63,18 @@ class Api
       'Cache-Control': 'no-store',
       'Pragma': 'no-cache'
     }
+  end
+
+  def fetch_entire_data(url, data)
+    Parallel.each(data['pages'], in_threads: 5) do |page|
+      resp = get("#{data['filters']}&page=#{page}")
+      Validate.response(resp, 200)
+
+      paged_data = JSON.parse(resp)
+      data['issues'] << paged_data['issues']
+    end
+
+    data['issues'].flatten!
+    data
   end
 end

@@ -4,3 +4,5 @@ source 'https://rubygems.org'
 gemspec
 gem 'rest-client', '>= 1.6.7'
 gem 'oauth', '>=0.5.1'
+gem 'json', '>=1.8.1'
+gem 'parallel', '>=1.9.0'
