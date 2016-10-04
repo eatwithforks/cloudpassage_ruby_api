@@ -37,6 +37,8 @@ class Api
 
   def get_paginated(url)
     data = Query.new(get(url)).fetch_params(@hostname)
+    return data unless data.key? 'pagination'
+
     fetch_entire_data(url, data)
   end
 

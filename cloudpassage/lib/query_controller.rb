@@ -11,7 +11,7 @@ class Query
 
   def fetch_params(api_hostname)
     data = JSON.parse(@resp)
-    return @resp unless data.key? 'pagination'
+    return data unless data.key? 'pagination'
 
     data['per_page'] = current_per_page(data['pagination']['next'])
     data['pages'] = current_pages(data['per_page'], data['count'])
