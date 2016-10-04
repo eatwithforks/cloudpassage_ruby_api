@@ -1,6 +1,6 @@
 # encoding: utf-8
 require 'json'
-require_relative 'validator'
+require_relative 'validate'
 
 # Returns custom query parameters
 class Query

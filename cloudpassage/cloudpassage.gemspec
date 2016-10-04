@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
 
-  spec.files         = ["lib/cloudpassage.rb", "lib/oauth.rb", "lib/validator.rb", "lib/query_controller.rb"]
+  spec.files         = ["lib/cloudpassage.rb", "lib/oauth.rb", "lib/validate.rb", "lib/query_controller.rb"]
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]

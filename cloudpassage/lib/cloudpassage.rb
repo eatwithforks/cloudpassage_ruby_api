@@ -2,7 +2,7 @@
 require 'rest-client'
 require 'parallel'
 require_relative 'oauth'
-require_relative 'validator'
+require_relative 'validate'
 require_relative 'query_controller'
 
 # Returns CloudPassage API HTTP requests
