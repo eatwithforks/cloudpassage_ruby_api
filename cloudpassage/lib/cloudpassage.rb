@@ -65,6 +65,10 @@ class Api
     }
   end
 
+  def blacklist
+    %w(per_page pages filters)
+  end
+
   def fetch_entire_data(url, data)
     Parallel.each(data['pages'], in_threads: 5) do |page|
       resp = get("#{data['filters']}&page=#{page}")
@@ -75,6 +79,7 @@ class Api
     end
 
     data['issues'].flatten!
+    blacklist.map { |key| data.delete(key) }
     data
   end
 end
