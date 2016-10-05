@@ -36,7 +36,7 @@ class Api
   end
 
   def get_paginated(url)
-    data = Query.new(get(url)).fetch_params(@hostname)
+    data = Query.new(get(url)).fetch_params
     return data unless data.key? 'pagination'
 
     fetch_entire_data(url, data)
@@ -68,19 +68,20 @@ class Api
   end
 
   def blacklist
-    %w(per_page pages filters)
+    %w(per_page pages filters primary_key)
   end
 
   def fetch_entire_data(url, data)
+    @pkey = data['primary_key']
     Parallel.each(data['pages'], in_threads: 5) do |page|
       resp = get("#{data['filters']}&page=#{page}")
       Validate.response(resp, 200)
 
       paged_data = JSON.parse(resp)
-      data['issues'] << paged_data['issues']
+      data[@pkey] << paged_data[@pkey]
     end
 
-    data['issues'].flatten!
+    data[@pkey].flatten!
     blacklist.map { |key| data.delete(key) }
     data
   end

@@ -9,13 +9,14 @@ class Query
     @resp = resp
   end
 
-  def fetch_params(api_hostname)
+  def fetch_params
     data = JSON.parse(@resp)
     return data unless data.key? 'pagination'
 
     data['per_page'] = current_per_page(data['pagination']['next'])
     data['pages'] = current_pages(data['per_page'], data['count'])
-    data['filters'] = current_filters(api_hostname, data['pagination']['next'])
+    data['filters'] = current_filters(data['pagination']['next'])
+    data['primary_key'] = primary_key(data.keys)
     data
   end
 
@@ -27,12 +28,21 @@ class Query
     (2..(data_count / per_page.to_f).ceil).to_a
   end
 
-  def current_filters(api_hostname, next_page_url)
-    params = next_page_url.split(api_hostname).last.split('?')
+  def remove_hostname(next_page_url)
+    next_page_url.match(/\/v\d.*/).to_s
+  end
+  def current_filters(next_page_url)
+    cleaned_url = remove_hostname(next_page_url)
+    params = cleaned_url.split('?')
     "#{params.first}?" + clean_page_attrs(params).join('&')
   end
 
   def clean_page_attrs(data)
     data.last.split('&').delete_if { |e| e.match /page=\d+/ }
+  end
+
+  def primary_key(keys)
+    blacklist = %w(count pagination per_page pages filters)
+    keys.delete_if { |e| blacklist.include? e }.first
   end
 end
