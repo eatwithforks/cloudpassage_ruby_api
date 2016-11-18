@@ -1,15 +1,6 @@
 require_relative 'test_helper'
 require 'cloudpassage'
 
-def mocks
-  @api_token = MiniTest::Mock.new
-  @api_token.expect :token, 'my-token', ['key-123', 'secret-456', 'fake-portal']
-
-  @api = MiniTest::Mock.new
-  @api.expect :new, true, ['key-123', 'secret-456']
-  @api.expect :create_header, @header, ['foo']
-end
-
 class CloudpassageTest < Minitest::Test
   def setup
     @header = {
@@ -19,7 +10,8 @@ class CloudpassageTest < Minitest::Test
       pragma: 'no-cache'
     }
 
-    mocks
+    mock_api
+    mock_api_token
   end
 
   def test_that_it_has_a_version_number
