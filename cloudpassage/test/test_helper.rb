@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'cloudpassage'
-
 require 'minitest/autorun'
+require 'cloudpassage/version'
 
 def mock_api_token
   @api_token = MiniTest::Mock.new
