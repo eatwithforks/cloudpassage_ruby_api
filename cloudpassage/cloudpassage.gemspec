@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency('rest-client', '>= 1.6.7')
+  spec.add_runtime_dependency('rest-client', '~> 1.6.7', '>= 1.6.7')
   spec.add_runtime_dependency('oauth', '>=0.5.1')
   spec.add_runtime_dependency('json', '>= 1.8.1')
   spec.add_runtime_dependency('parallel', '>= 1.9.0')
