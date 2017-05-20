@@ -17,40 +17,46 @@ class Api
     @key_id = key_id
     @secret_key = secret_key
     @hostname = hostname
+    @timeout = 90000000
   end
 
   def get(url)
-    do_analyze({ method: :get, url: "#{@hostname}/#{url}", timeout: 90000000 })
+    perform({ method: :get, url: "#{@hostname}/#{url}", timeout: @timeout })
   end
 
   def post(url, body)
-    do_analyze({ method: :post, url: "#{@hostname}/#{url}", payload: body, timeout: 90000000 })
+    perform({ method: :post, url: "#{@hostname}/#{url}", payload: body, timeout: @timeout })
   end
 
   def put(url, body)
-    do_analyze({ method: :put, url: "#{@hostname}/#{url}", payload: body, timeout: 90000000 })
+    perform({ method: :put, url: "#{@hostname}/#{url}", payload: body, timeout: @timeout })
   end
 
   def delete(url)
-    do_analyze({ method: :delete, url: "#{@hostname}/#{url}", timeout: 90000000 })
+    perform({ method: :delete, url: "#{@hostname}/#{url}", timeout: @timeout })
   end
 
   def get_paginated(url)
     resp = get(url)
     data = JSON.parse(resp)
-    return data unless data.key? 'pagination'
 
-    paginate(data, determine_primary_key(data))
+    return data unless data.key? 'pagination' and data['pagination'].key? 'next'
+
+    pkey = determine_primary_key(data)
+    return data unless pkey.size == 1
+
+    paginate(data, pkey.first)
   end
 
   protected
 
-  def do_analyze(body)
+  def perform(body)
     begin
       retries ||= 0
       body[:headers] = @header
       resp = RestClient::Request.execute(body) { |response| response }
       raise if resp.code == 401 or resp.code >= 500
+
       return resp
     rescue
       if resp.code == 401
@@ -77,27 +83,26 @@ class Api
     }
   end
 
-  def blacklist
-    %w(count pagination)
-  end
-
   def determine_primary_key(data)
-    (data.keys - blacklist).first
+    (data.keys - %w(count pagination))
   end
 
-  def paginate(data, primary_key)
-    return data unless data['pagination'].key? 'next'
-    copy_data = data
+  def determine_next_url(data)
+    /.com(.*?)(.*)$/.match(data['pagination']['next'])[2]
+  end
 
+  def paginate(data, pkey)
+    paged_data = data
     loop do
-      next_page = /.com(.*?)(.*)$/.match(data['pagination']['next'])[2]
+      next_page = determine_next_url(data)
       resp = get(next_page)
       data = JSON.parse(resp)
-      copy_data[primary_key] << data[primary_key]
+      paged_data[pkey] << data[pkey]
+
       break unless data['pagination'].key? 'next'
     end
 
-    copy_data[primary_key].flatten!
-    copy_data
+    paged_data[pkey].flatten!
+    paged_data
   end
 end
