@@ -3,7 +3,6 @@ require 'rest-client'
 require 'parallel'
 require_relative 'oauth'
 require_relative 'validate'
-require_relative 'query_controller'
 
 # Returns CloudPassage API HTTP requests
 class Api
@@ -21,26 +20,27 @@ class Api
   end
 
   def get(url)
-    do_analyze({ method: :get, url: "#{@hostname}/#{url}" })
+    do_analyze({ method: :get, url: "#{@hostname}/#{url}", :timeout => 90000000 })
   end
 
   def post(url, body)
-    do_analyze({ method: :post, url: "#{@hostname}/#{url}", payload: body })
+    do_analyze({ method: :post, url: "#{@hostname}/#{url}", payload: body, :timeout => 90000000 })
   end
 
   def put(url, body)
-    do_analyze({ method: :put, url: "#{@hostname}/#{url}", payload: body })
+    do_analyze({ method: :put, url: "#{@hostname}/#{url}", payload: body, :timeout => 90000000 })
   end
 
   def delete(url)
-    do_analyze({ method: :delete, url: "#{@hostname}/#{url}" })
+    do_analyze({ method: :delete, url: "#{@hostname}/#{url}", :timeout => 90000000 })
   end
 
   def get_paginated(url)
-    data = Query.new(get(url)).fetch_params
+    resp = get(url)
+    data = JSON.parse(resp)
     return data unless data.key? 'pagination'
 
-    fetch_entire_data(url, data)
+    paginate(data, determine_primary_key(data))
   end
 
   protected
@@ -50,13 +50,13 @@ class Api
       retries ||= 0
       body[:headers] = @header
       resp = RestClient::Request.execute(body) { |response| response }
-      raise if resp.code == 401 or resp.code.to_s.match(/^5.*/)
+      raise if resp.code == 401 or resp.code >= 500
       return resp
     rescue
       if resp.code == 401
         @header = renew_session
         retry if (retries += 1) < MAX_RETRIES
-      elsif resp.code.to_s.match(/^5.*/)
+      elsif resp.code >= 500
         sleep RETRY_DELAYS[retries]
         retry if (retries += 1) < MAX_RETRIES
       end
@@ -78,21 +78,26 @@ class Api
   end
 
   def blacklist
-    %w(per_page pages filters primary_key)
+    %w(count pagination)
   end
 
-  def fetch_entire_data(url, data)
-    pkey = data['primary_key']
-    data['pages'].each do |page|
-      resp = get("#{data['filters']}&page=#{page}")
-      Validate.response(resp, 200)
+  def determine_primary_key(data)
+    (data.keys - blacklist).first
+  end
 
-      paged_data = JSON.parse(resp)
-      data[pkey] << paged_data[pkey]
+  def paginate(data, primary_key)
+    return data unless data['pagination'].key? 'next'
+    copy_data = data
+
+    loop do
+      next_page = /.com(.*?)(.*)$/.match(data['pagination']['next'])[2]
+      resp = get(next_page)
+      data = JSON.parse(resp)
+      copy_data[primary_key] << data[primary_key]
+      break unless data['pagination'].key? 'next'
     end
 
-    data[pkey].flatten!
-    blacklist.map { |key| data.delete(key) }
-    data
+    copy_data[primary_key].flatten!
+    copy_data
   end
 end
