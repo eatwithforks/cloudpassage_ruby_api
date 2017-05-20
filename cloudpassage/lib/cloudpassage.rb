@@ -20,19 +20,19 @@ class Api
   end
 
   def get(url)
-    do_analyze({ method: :get, url: "#{@hostname}/#{url}", :timeout => 90000000 })
+    do_analyze({ method: :get, url: "#{@hostname}/#{url}", timeout: 90000000 })
   end
 
   def post(url, body)
-    do_analyze({ method: :post, url: "#{@hostname}/#{url}", payload: body, :timeout => 90000000 })
+    do_analyze({ method: :post, url: "#{@hostname}/#{url}", payload: body, timeout: 90000000 })
   end
 
   def put(url, body)
-    do_analyze({ method: :put, url: "#{@hostname}/#{url}", payload: body, :timeout => 90000000 })
+    do_analyze({ method: :put, url: "#{@hostname}/#{url}", payload: body, timeout: 90000000 })
   end
 
   def delete(url)
-    do_analyze({ method: :delete, url: "#{@hostname}/#{url}", :timeout => 90000000 })
+    do_analyze({ method: :delete, url: "#{@hostname}/#{url}", timeout: 90000000 })
   end
 
   def get_paginated(url)
