@@ -1,5 +1,4 @@
 # encoding: utf-8
-require_relative 'cloudpassage'
 
 class Paginate
   class << self
