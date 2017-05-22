@@ -3,6 +3,7 @@ require 'rest-client'
 require 'parallel'
 require_relative 'oauth'
 require_relative 'validate'
+require_relative 'paginate'
 
 # Returns CloudPassage API HTTP requests
 class Api
@@ -37,15 +38,7 @@ class Api
   end
 
   def get_paginated(url)
-    resp = get(url)
-    data = JSON.parse(resp)
-
-    return data unless data.key? 'pagination' and data['pagination'].key? 'next'
-
-    pkey = determine_primary_key(data)
-    return data unless pkey.size == 1
-
-    paginate(data, pkey.first)
+    Paginate.paginate(get(url)) { |next_page| get(next_page) }
   end
 
   protected
@@ -81,28 +74,5 @@ class Api
       'Cache-Control': 'no-store',
       'Pragma': 'no-cache'
     }
-  end
-
-  def determine_primary_key(data)
-    (data.keys - %w(count pagination))
-  end
-
-  def determine_next_url(data)
-    /.com(.*?)(.*)$/.match(data['pagination']['next'])[2]
-  end
-
-  def paginate(data, pkey)
-    paged_data = data
-    loop do
-      next_page = determine_next_url(data)
-      resp = get(next_page)
-      data = JSON.parse(resp)
-      paged_data[pkey] << data[pkey]
-
-      break unless data['pagination'].key? 'next'
-    end
-
-    paged_data[pkey].flatten!
-    paged_data
   end
 end
