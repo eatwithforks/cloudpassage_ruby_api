@@ -7,7 +7,7 @@ require_relative 'paginate'
 
 # Returns CloudPassage API HTTP requests
 class Api
-  MAX_RETRIES = 5
+  MAX_RETRIES = 1
   RETRY_DELAYS = [2, 8, 15, 45, 90]
 
   def initialize(key_id, secret_key, hostname = nil)
@@ -38,7 +38,7 @@ class Api
   end
 
   def get_paginated(url)
-    Paginate.paginate(get(url)) { |next_page| get(next_page) }
+    Paginate.perform(get(url)) { |next_page| get(next_page) }
   end
 
   protected
@@ -56,9 +56,14 @@ class Api
         @header = renew_session
         retry if (retries += 1) < MAX_RETRIES
       elsif resp.code >= 500
+        puts "[FATAL]: #{resp.code} on #{body[:url]}: Attempt #{retries + 1}"
         sleep RETRY_DELAYS[retries]
         retry if (retries += 1) < MAX_RETRIES
       end
+
+      puts "[INFO]: Reached Max number of retries: #{MAX_RETRIES}"
+      puts "[INFO]: Exiting..."
+      exit
     end
   end
 

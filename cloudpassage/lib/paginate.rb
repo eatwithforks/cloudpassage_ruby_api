@@ -21,7 +21,7 @@ class Paginate
       /.com(.*?)(.*)$/.match(data['pagination']['next'])[2]
     end
 
-    def paginate(resp)
+    def perform(resp)
       data, pkey = has_pagination?(resp)
       return data if pkey.nil?
 
