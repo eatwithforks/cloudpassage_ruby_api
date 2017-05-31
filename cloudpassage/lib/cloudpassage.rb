@@ -7,7 +7,7 @@ require_relative 'paginate'
 
 # Returns CloudPassage API HTTP requests
 class Api
-  MAX_RETRIES = 1
+  MAX_RETRIES = 5
   RETRY_DELAYS = [2, 8, 15, 45, 90]
 
   def initialize(key_id, secret_key, hostname = nil)
