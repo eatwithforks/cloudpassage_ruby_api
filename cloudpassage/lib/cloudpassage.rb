@@ -48,11 +48,16 @@ class Api
       retries ||= 0
       body[:headers] = @header
       resp = RestClient::Request.execute(body) { |response| response }
+
       raise if resp.code == 401 or resp.code >= 500
 
       return resp
     rescue
-      if resp.code == 401
+      if resp.nil?
+        puts "[FATAL]: #{body[:url]} returned nil: Attempt #{retries + 1}"
+        sleep RETRY_DELAYS[retries]
+        retry if (retries += 1) < MAX_RETRIES
+      elsif resp.code == 401
         @header = renew_session
         retry if (retries += 1) < MAX_RETRIES
       elsif resp.code >= 500
